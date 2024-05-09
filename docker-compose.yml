@@ -1,3 +1,5 @@
+version: "3.8"
+
 services:
   php:
     container_name: delivery_app
@@ -21,13 +23,17 @@ services:
 ###> doctrine/doctrine-bundle ###
   database:
     container_name: database_app
-    image: mysql:${MYSQL_VERSION}-oracle
+    image: postgres:${POSTGRES_VERSION:-16}-alpine
     environment:
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      POSTGRES_DB: ${POSTGRES_DB:-app}
       # You should definitely change the password in production
-      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
-      MYSQL_USER: ${MYSQL_USER}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-!ChangeMe!}
+      POSTGRES_USER: ${POSTGRES_USER:-app}
+    healthcheck:
+      test: ["CMD", "pg_isready", "-d", "${POSTGRES_DB:-app}", "-U", "${POSTGRES_USER:-app}"]
+      timeout: 5s
+      retries: 5
+      start_period: 60s
     volumes:
       - database_data:/var/lib/postgresql/data:rw
       # You may use a bind-mounted host directory instead, so that it is harder to accidentally remove the volume and lose all your data!
