@@ -1,0 +1,40 @@
+services:
+  php:
+    container_name: delivery_app
+    build:
+      context: .
+    ports:
+      - '9000:9000'
+    volumes:
+      - .:/var/www/delivery-app
+
+  nginx:
+    container_name: nginx_app
+    image: nginx:stable-alpine
+    ports:
+      - '8080:80'
+    volumes:
+      - .:/var/www/delivery-app
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - php
+###> doctrine/doctrine-bundle ###
+  database:
+    container_name: database_app
+    image: mysql:${MYSQL_VERSION}-oracle
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      # You should definitely change the password in production
+      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - database_data:/var/lib/postgresql/data:rw
+      # You may use a bind-mounted host directory instead, so that it is harder to accidentally remove the volume and lose all your data!
+      # - ./docker/db/data:/var/lib/postgresql/data:rw
+###< doctrine/doctrine-bundle ###
+
+volumes:
+###> doctrine/doctrine-bundle ###
+  database_data:
+###< doctrine/doctrine-bundle ###
